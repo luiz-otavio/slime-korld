@@ -1,12 +1,19 @@
 package io.github.luizotavio.slimekorld.pojo
 
-import io.github.luizotavio.slimekorld.SlimeReaderUtil
-import io.github.luizotavio.slimekorld.stream.SlimeInputStream
+import io.github.luizotavio.slimekorld.SlimeReaderUtil.readBitSet
+import io.github.luizotavio.slimekorld.SlimeReaderUtil.readBlockIds
+import io.github.luizotavio.slimekorld.SlimeReaderUtil.readByteArray
+import io.github.luizotavio.slimekorld.SlimeReaderUtil.readIntArray
+import io.github.luizotavio.slimekorld.SlimeReaderUtil.readNibbleArray
+import io.github.luizotavio.slimekorld.SlimeReaderUtil.skipCompressed
 import net.minecraft.server.v1_8_R3.*
+import java.io.DataInputStream
 import java.io.IOException
+import java.io.InputStream
+import java.io.RandomAccessFile
 import java.util.*
 
-class ProtoSlimeChunk(
+data class ProtoSlimeChunk(
     val coords: ChunkCoordIntPair,
     val sections: Array<ChunkSection?>,
     val biomes: ByteArray,
@@ -14,18 +21,19 @@ class ProtoSlimeChunk(
 ) {
 
     companion object {
-        private val HEIGHTMAP_ENTRIES = 256
-        private val BIOMES_LENGTH = 256
-        private val SECTIONS_PER_CHUNK = 16
-        private val BLOCKS_LENGTH = 4096
+        private const val HEIGHTMAP_ENTRIES = 256
+        private const val BIOMES_LENGTH = 256
+        private const val SECTIONS_PER_CHUNK = 16
+        private const val BLOCKS_LENGTH = 4096
 
         @Throws(IOException::class)
-        fun read(inputStream: SlimeInputStream, coords: ChunkCoordIntPair): ProtoSlimeChunk {
-            val heightMap: IntArray = inputStream.readIntArray(HEIGHTMAP_ENTRIES)
-            val biomes: ByteArray = inputStream.readByteArray(BIOMES_LENGTH)
+        fun read(inputStream: DataInputStream, coords: ChunkCoordIntPair): ProtoSlimeChunk {
+            val heightMap: IntArray = readIntArray(inputStream, HEIGHTMAP_ENTRIES)
+            val biomes: ByteArray = readByteArray(inputStream, BIOMES_LENGTH)
 
             // Read sections
-            val populatedSections: BitSet = inputStream.readBitSet(SECTIONS_PER_CHUNK / 8)
+            val populatedSections: BitSet = readBitSet(inputStream, SECTIONS_PER_CHUNK / 8)
+
             val sections = arrayOfNulls<ChunkSection>(SECTIONS_PER_CHUNK)
 
             for (y in 0 until SECTIONS_PER_CHUNK) {
@@ -36,17 +44,17 @@ class ProtoSlimeChunk(
                 val yPos = y shl 4
                 val section = ChunkSection(yPos, true) // skyLight
 
-                inputStream.readNibbleArray(section.emittedLightArray)
+                readNibbleArray(inputStream, section.emittedLightArray)
 
-                val blocks: ByteArray = inputStream.readByteArray(BLOCKS_LENGTH)
-                val data: NibbleArray = inputStream.readNibbleArray()
+                val blocks: ByteArray = readByteArray(inputStream, BLOCKS_LENGTH)
+                val data: NibbleArray = readNibbleArray(inputStream)
 
-                SlimeReaderUtil.readBlockIds(section.idArray, blocks, data)
+                readBlockIds(section.idArray, blocks, data)
 
-                inputStream.readNibbleArray(section.skyLightArray)
+                readNibbleArray(inputStream, section.skyLightArray)
 
                 // Skip custom extra data
-                inputStream.skipBytes(inputStream.readInt())
+                skipCompressed(inputStream)
 
                 section.recalcBlockCounts()
 
@@ -57,21 +65,15 @@ class ProtoSlimeChunk(
         }
     }
 
-    private var tileEntities: MutableList<NBTTagCompound>? = null
-    private var entities: MutableList<NBTTagCompound>? = null
+    private val tileEntities: MutableList<NBTTagCompound> = ArrayList()
+    private val entities: MutableList<NBTTagCompound> = ArrayList()
 
     fun addTileEntity(compound: NBTTagCompound) {
-        if (tileEntities == null) {
-            tileEntities = ArrayList()
-        }
-        tileEntities!!.add(compound)
+        tileEntities.add(compound)
     }
 
     fun addEntity(compound: NBTTagCompound) {
-        if (entities == null) {
-            entities = ArrayList()
-        }
-        entities!!.add(compound)
+        entities.add(compound)
     }
 
     /**
@@ -82,33 +84,32 @@ class ProtoSlimeChunk(
      * @param chunk the chunk to add the entities to
      */
     private fun loadEntities(world: World, chunk: Chunk) {
-        if (entities != null) {
-            for (compound in entities!!) {
-                var entity = EntityTypes.a(compound, world)
-                chunk.g(true)
-                if (entity == null) {
-                    continue
-                }
-                chunk.a(entity)
+        for (compound in entities) {
+            chunk.g(true)
 
-                // Add riding entities
-                var riding = compound
-                while (riding.hasKeyOfType("Riding", 10)) {
-                    val other = EntityTypes.a(riding.getCompound("Riding"), world) ?: break
-                    chunk.a(other)
-                    entity!!.mount(other)
-                    entity = other
-                    riding = riding.getCompound("Riding")
-                }
+            var entity = EntityTypes.a(compound, world) ?: continue
+
+            chunk.a(entity)
+
+            // Add riding entities
+            var riding = compound
+            while (riding.hasKeyOfType("Riding", 10)) {
+                val other = EntityTypes.a(
+                    riding.getCompound("Riding"), world
+                ) ?: break
+
+                chunk.a(other)
+                entity.mount(other)
+
+                entity = other
+                riding = riding.getCompound("Riding")
             }
         }
-        if (tileEntities != null) {
-            for (compound in tileEntities!!) {
-                val tileEntity = TileEntity.c(compound)
-                if (tileEntity != null) {
-                    chunk.a(tileEntity)
-                }
-            }
+
+        for (compound in tileEntities) {
+            val tileEntity = TileEntity.c(compound) ?: continue
+
+            chunk.a(tileEntity)
         }
     }
 
@@ -118,15 +119,29 @@ class ProtoSlimeChunk(
      * @param world the world the chunk is in
      * @return the loaded chunk
      */
-    fun load(world: World): Chunk {
-        val chunk = Chunk(world, coords.x, coords.z)
-        chunk.a(heightMap)
-        chunk.d(true) // TerrainPopulated
-        chunk.e(true) // LightPopulated
-        chunk.c(0) // InhabitedTime
-        chunk.a(sections)
-        chunk.a(biomes)
-        loadEntities(world, chunk)
-        return chunk
+    fun load(world: World) = Chunk(world, coords.x, coords.z).apply {
+        a(heightMap)
+        d(true) // TerrainPopulated
+        e(true) // LightPopulated
+        c(0) // InhabitedTime
+        a(sections)
+        a(biomes)
+
+        loadEntities(world, this)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ProtoSlimeChunk
+
+        if (coords != other.coords) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return coords.hashCode()
     }
 }
