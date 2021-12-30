@@ -2,13 +2,14 @@ package io.github.luizotavio.slimekorld.loader
 
 import gnu.trove.map.hash.TLongObjectHashMap
 import io.github.luizotavio.slimekorld.pojo.ProtoSlimeChunk
-import io.github.luizotavio.slimekorld.pojo.SlimeFile
+import io.github.luizotavio.slimekorld.stream.DefaultSlimeCodec
 import net.minecraft.server.v1_8_R3.Chunk
 import net.minecraft.server.v1_8_R3.IChunkLoader
 import net.minecraft.server.v1_8_R3.World
 import org.bukkit.craftbukkit.v1_8_R3.util.LongHash
 import java.io.File
 import java.io.IOException
+import java.io.RandomAccessFile
 
 class SlimeChunkLoader(
     file: File
@@ -22,7 +23,10 @@ class SlimeChunkLoader(
             throw IOException("File not found: $file")
         }
 
-        protoChunks = SlimeFile.read(file).protoChunks
+        val randomAccessFile = RandomAccessFile(file, "r")
+
+        protoChunks = DefaultSlimeCodec(randomAccessFile)
+            .run { read().protoChunks }
     }
 
     /**

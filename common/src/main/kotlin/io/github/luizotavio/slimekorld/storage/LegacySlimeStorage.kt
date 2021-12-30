@@ -4,32 +4,26 @@ import io.github.luizotavio.slimekorld.SlimeKorld
 import io.github.luizotavio.slimekorld.SlimeWorld
 import io.github.luizotavio.slimekorld.exception.SlimeStorageException
 import io.github.luizotavio.slimekorld.impl.LegacySlimeWorld
-import io.github.luizotavio.slimekorld.stream.SlimeOutputStream
+import io.github.luizotavio.slimekorld.stream.DefaultSlimeCodec
 import org.bukkit.World
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld
 import java.io.File
-import java.io.FileOutputStream
+import java.io.RandomAccessFile
 
 class LegacySlimeStorage(
     file: File
 ) : AbstractSlimeWorldStorage(file) {
 
     override fun save(slimeWorld: SlimeWorld) {
-        val path = File(path, "${slimeWorld.name}.slime")
-
-        val outputStream = SlimeOutputStream(
-            FileOutputStream(path)
+        val file = RandomAccessFile(
+            File(path, "${slimeWorld.name}.slime"),
+            "rw"
         )
 
         val world = slimeWorld.getWorld() as CraftWorld
 
-        try {
-            outputStream.writeAll(
-                ArrayList(world.handle.chunkProviderServer.chunks.values()),
-                true
-            )
-        } catch (exception: Exception) {
-            throw SlimeStorageException("Failed to save SlimeWorld")
+        DefaultSlimeCodec(file).apply {
+            write(ArrayList(world.handle.chunkProviderServer.chunks.values()))
         }
     }
 
