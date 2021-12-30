@@ -1,13 +1,13 @@
 package io.github.luizotavio.slimekorld
 
+import com.github.luben.zstd.Zstd
 import net.minecraft.server.v1_8_R3.Block
+import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools
+import net.minecraft.server.v1_8_R3.NBTTagCompound
 import net.minecraft.server.v1_8_R3.NibbleArray
-import kotlin.experimental.and
+import java.io.*
+import java.util.*
 
-/**
- * Thank you so much hugmanrique for this code!
- * https://github.com/hugmanrique/Slime
- */
 object SlimeReaderUtil {
 
     /**
@@ -61,5 +61,112 @@ object SlimeReaderUtil {
         }
         return packed.toChar()
     }
+
+    /**
+     * The number of bytes needed to store a [NibbleArray].
+     */
+    private const val NIBBLE_ARRAY_LENGTH = 2048
+
+    @Throws(IOException::class)
+    fun readIntArray(inputStream: DataInput, count: Int): IntArray =
+        inputStream.run {
+            val array = IntArray(count)
+
+            for (i in 0 until count) {
+                array[i] = readInt()
+            }
+
+            array
+        }
+
+    @Throws(IOException::class)
+    fun readByteArray(inputStream: DataInput, length: Int): ByteArray =
+        inputStream.run { ByteArray(length).apply { readFully(this) } }
+
+    /**
+     * Reads and parses the chunk nibble array.
+     *
+     * @return the nibble array
+     * @throws IOException if the bytes cannot be read
+     * @see .NIBBLE_ARRAY_LENGTH
+     */
+    @Throws(IOException::class)
+    fun readNibbleArray(dataInput: DataInput): NibbleArray =
+        NibbleArray(
+            readByteArray(dataInput, NIBBLE_ARRAY_LENGTH)
+        )
+
+    /**
+     * Writes the next [.NIBBLE_ARRAY_LENGTH] bytes
+     * to the specified nibble array.
+     *
+     * @param nibbleArray the nibble array to write to
+     * @return the number of read bytes
+     * @throws IOException if the bytes cannot be read
+     */
+    @Throws(IOException::class)
+    fun readNibbleArray(dataInputStream: DataInputStream, nibbleArray: NibbleArray): Int =
+        dataInputStream.read(
+            nibbleArray.a()
+        )
+
+    @Throws(IOException::class)
+    fun readBitSet(inputStream: DataInput, byteCount: Int): BitSet =
+        BitSet.valueOf(
+            readByteArray(inputStream, byteCount)
+        )
+
+    /**
+     * Reads a block of zstd-compressed data. This method
+     * expects the following ints to be the compressed size,
+     * and uncompressed size respectively.
+     *
+     * @return the uncompressed data
+     * @throws IOException if the bytes cannot be read
+     * @throws IllegalArgumentException if the uncompressed length doesn't match
+     */
+    @Throws(IOException::class)
+    fun readCompressed(inputStream: DataInput): ByteArray = inputStream.run {
+        val compressedLength = readInt()
+        val uncompressedLength = readInt()
+
+        if (uncompressedLength != NIBBLE_ARRAY_LENGTH) {
+            throw IllegalArgumentException("Uncompressed length doesn't match")
+        }
+
+        val compressed = ByteArray(compressedLength)
+
+        readFully(compressed)
+
+        return@run Zstd.decompress(compressed, uncompressedLength)
+    }
+
+    /**
+     * Reads and parses a block of zstd-compressed bytes as
+     * an NBT named compound tag.
+     *
+     * @return the parsed named compound tag.
+     * @throws IOException if the bytes cannot be read
+     * @see .readCompressed
+     */
+    @Throws(IOException::class)
+    fun readCompressedCompound(inputStream: DataInput): NBTTagCompound = NBTCompressedStreamTools.a(
+        ByteArrayInputStream(
+            readCompressed(inputStream)
+        )
+    )
+
+    /**
+     * Skips a block of zstd-compressed data.
+     *
+     * @return the number of bytes skipped
+     * @throws IOException if the bytes cannot be skipped
+     * @see .readCompressed
+     */
+    @Throws(IOException::class)
+    fun skipCompressed(inputStream: DataInput) =
+        inputStream.skipBytes(
+            inputStream.readInt() + 4
+        )
 
 }
