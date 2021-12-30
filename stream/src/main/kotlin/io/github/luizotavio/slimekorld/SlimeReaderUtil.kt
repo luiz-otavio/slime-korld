@@ -44,13 +44,12 @@ object SlimeReaderUtil {
     }
 
     fun getBlockId(id: Int, blockData: Int): Char {
-        var data = blockData
         var packed = id shl 4 or blockData
         if (Block.d.a(packed) == null) {
             // Convert old block
             val block = Block.getById(id)
             if (block != null) {
-                data = try {
+                try {
                     block.toLegacyData(block.fromLegacyData(blockData))
                 } catch (ignored: Exception) {
                     block.toLegacyData(block.blockData)
