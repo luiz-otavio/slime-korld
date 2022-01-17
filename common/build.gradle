@@ -17,6 +17,14 @@ dependencies {
     implementation(project(':stream'))
 }
 
+shadowJar {
+    classifier = ""
+
+    exclude '**/*.kotlin_metadata'
+    exclude '**/*.kotlin_module'
+    exclude '**/*.kotlin_builtins'
+}
+
 jar.enabled = false
 shadowJar.classifier = ""
 
