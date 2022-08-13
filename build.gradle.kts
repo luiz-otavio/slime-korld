@@ -18,4 +18,8 @@ subprojects {
     repositories {
         mavenCentral()
     }
+
+    dependencies {
+        implementation("org.jetbrains:annotations:16.0.2")
+    }
 }
