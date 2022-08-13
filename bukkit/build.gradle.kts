@@ -2,6 +2,7 @@ import org.gradle.internal.impldep.org.apache.commons.lang.StringUtils
 
 plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("maven-publish")
 }
 
 repositories {
@@ -41,5 +42,28 @@ tasks.shadowJar {
     // Exclude plugin-yml due to item-nbt-api
     minimize {
         exclude("*.yml")
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("Jitpack") {
+            project.shadow.component(this)
+
+            groupId = "me.luizotavio.minecraft"
+            artifactId = "slime-korld"
+            version = minecraftVersion
+
+            pom {
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://choosealicense.com/licenses/mit/")
+                    }
+                }
+
+                url.set("https://github.com/luiz-otavio")
+            }
+        }
     }
 }
