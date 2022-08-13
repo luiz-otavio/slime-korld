@@ -5,7 +5,7 @@ Since I'm so tired of writing documentation, I'm going to write it in markdown.
 # Slime Korld
 [![](https://jitpack.io/v/luiz-otavio/slime-korld.svg)](https://jitpack.io/#luiz-otavio/slime-korld)
 
-Bukkit library written to implement the Slime World Format from Hypixel.
+Bukkit library to implement the Slime World Format from Hypixel.
 
 ## Overview
 Slime Korld is a library that allows you to create Slime Worlds in a Minecraft Server.
