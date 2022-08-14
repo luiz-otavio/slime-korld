@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Set;
 
+import static me.luizotavio.minecraft.common.version.SlimeVersion.CURRENT_SLIME_VERSION;
 import static me.luizotavio.minecraft.common.version.SlimeVersion.SLIME_MAGIC_HEADER;
 import static org.apache.commons.lang.ArrayUtils.EMPTY_BYTE_ARRAY;
 
@@ -73,6 +74,13 @@ public class SlimeInputStream extends DataInputStream {
 
         if (!Arrays.equals(SLIME_MAGIC_HEADER, magic)) {
             throw new InternalSlimeException("Invalid magic header");
+        }
+
+        // Fix slime version
+        byte slimeVersion = readByte();
+
+        if (slimeVersion != CURRENT_SLIME_VERSION) {
+            throw new InternalSlimeException("That slime version isn't supported.");
         }
 
         byte version = readByte();
