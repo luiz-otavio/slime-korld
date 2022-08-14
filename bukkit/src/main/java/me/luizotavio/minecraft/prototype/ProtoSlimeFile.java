@@ -212,10 +212,6 @@ public class ProtoSlimeFile {
         return protoChunks;
     }
 
-    public byte[] getMapData() {
-        return mapData;
-    }
-
     public byte[] getTileData() {
         return tileData;
     }
@@ -250,6 +246,15 @@ public class ProtoSlimeFile {
 
     public WorldVersion getWorldVersion() {
         return worldVersion;
+    }
+
+    @NotNull
+    public NBTTagCompound getWorldMaps() {
+        try {
+            return readCompound(mapData);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Nullable

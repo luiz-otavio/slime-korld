@@ -42,9 +42,7 @@ import me.luizotavio.minecraft.data.container.BukkitSlimePersistentContainer;
 import me.luizotavio.minecraft.prototype.ProtoSlimeFile;
 import me.luizotavio.minecraft.world.CraftSlimeWorld;
 import me.luizotavio.minecraft.world.data.SlimeDataManager;
-import net.minecraft.server.v1_8_R3.MinecraftServer;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
@@ -233,6 +231,19 @@ public class BukkitSlimeWorld implements SlimeWorld {
             for (AbstractSlimeData slimeData : registry.getRegistered()) {
                 slimeData.deserialize(this, persistentContainer);
             }
+        }
+
+        // Fix world maps
+        NBTTagCompound worldMaps = protoSlimeFile.getWorldMaps();
+        NBTTagList maps = worldMaps.getList("maps", 10);
+
+        for (int i = 0; i < maps.size(); i++) {
+            NBTTagCompound map = maps.get(i);
+
+            WorldMap worldMap = new WorldMap("map_" + map.getInt("id"));
+            worldMap.a(map);
+
+            craftWorld.worldMaps.a(worldMap.id, worldMap);
         }
 
         return craftWorld.getWorld();
