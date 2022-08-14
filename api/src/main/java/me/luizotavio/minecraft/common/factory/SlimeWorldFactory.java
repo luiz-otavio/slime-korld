@@ -44,7 +44,6 @@ import java.io.File;
  * @since 12/08/2022
  */
 public interface SlimeWorldFactory {
-
     /**
      * Creates a new slime world based on {@link SlimeLoaderStrategy} from {@link SlimeKorld}}
      * Remember, after creating a new slime world, you must call {@link SlimeWorld#initialize()} to initialize the world.
@@ -54,7 +53,6 @@ public interface SlimeWorldFactory {
      * @return The new slime world.
      * @throws InternalSlimeException If an error occurs.
      */
-    @Nullable
     SlimeWorld createWorld(@NotNull String name, @NotNull WorldVersion worldVersion, SettingsProperty<?> ... properties) throws InternalSlimeException;
 
     /**
