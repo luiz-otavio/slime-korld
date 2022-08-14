@@ -27,6 +27,7 @@ package me.luizotavio.minecraft;
 import com.google.common.collect.ImmutableSet;
 import de.tr7zw.nbtapi.NBTContainer;
 import me.luizotavio.minecraft.codec.SlimeInputStream;
+import me.luizotavio.minecraft.codec.SlimeOutputStream;
 import me.luizotavio.minecraft.common.SlimeWorld;
 import me.luizotavio.minecraft.common.data.AbstractSlimeData;
 import me.luizotavio.minecraft.common.data.registry.SlimeDataRegistry;
@@ -36,6 +37,7 @@ import me.luizotavio.minecraft.common.event.impl.SlimeWorldUnloadEvent;
 import me.luizotavio.minecraft.common.exception.InternalSlimeException;
 import me.luizotavio.minecraft.common.service.SlimeKorld;
 import me.luizotavio.minecraft.common.settings.SettingsProperty;
+import me.luizotavio.minecraft.common.settings.factory.SettingsPropertyFactory;
 import me.luizotavio.minecraft.common.strategy.SlimeLoaderStrategy;
 import me.luizotavio.minecraft.common.version.WorldVersion;
 import me.luizotavio.minecraft.data.container.BukkitSlimePersistentContainer;
@@ -50,6 +52,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -161,6 +164,21 @@ public class BukkitSlimeWorld implements SlimeWorld {
             throw new InternalSlimeException("World unload cancelled");
         }
 
+        if (getProperty(SettingsPropertyFactory.SHOULD_SAVE)) {
+            SlimeKorld slimeKorld = getKorld();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+            try (SlimeOutputStream slimeOutputStream = new SlimeOutputStream(outputStream, this, slimeKorld.getDataRegistry())) {
+                slimeOutputStream.write();
+            } catch (Exception e) {
+                throw new InternalSlimeException("Failed to save world data", e);
+            }
+
+            byte[] data = outputStream.toByteArray();
+
+            slimeKorld.getLoaderStrategy().save(this, data);
+        }
+
         Bukkit.unloadWorld(world, true);
     }
 
@@ -174,6 +192,10 @@ public class BukkitSlimeWorld implements SlimeWorld {
             .getLoaderStrategy();
 
         byte[] data = loader.load(name, false);
+
+        if (data == null) {
+            throw new InternalSlimeException("World data not found");
+        }
 
         ProtoSlimeFile protoSlimeFile;
 

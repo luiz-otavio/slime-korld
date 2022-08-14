@@ -56,7 +56,7 @@ public class BukkitSlimeWorldFactory implements SlimeWorldFactory {
     }
 
     @Override
-    public @Nullable SlimeWorld createWorld(@NotNull String name, @NotNull WorldVersion worldVersion, SettingsProperty<?>... properties) throws InternalSlimeException {
+    public SlimeWorld createWorld(@NotNull String name, @NotNull WorldVersion worldVersion, SettingsProperty<?>... properties) throws InternalSlimeException {
         World world = Bukkit.getWorld(name);
 
         if (world != null) {

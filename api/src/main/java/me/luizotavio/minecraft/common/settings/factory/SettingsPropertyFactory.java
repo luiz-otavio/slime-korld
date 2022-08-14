@@ -37,12 +37,12 @@ import org.bukkit.GameMode;
  */
 public class SettingsPropertyFactory {
 
-    public static final SettingsProperty<Boolean> HAS_ENTITIES = SettingsProperty.createBooleanProperty("hasEntities", false, true);
-    public static final SettingsProperty<Boolean> HAS_EXTRA_DATA = SettingsProperty.createBooleanProperty("hasExtraData", false, true);
-    public static final SettingsProperty<Boolean> HAS_PVP = SettingsProperty.createBooleanProperty("hasPVP", false, true);
+    public static final SettingsProperty<Boolean> HAS_ENTITIES = SettingsProperty.createBooleanProperty("hasEntities", false, false);
+    public static final SettingsProperty<Boolean> HAS_EXTRA_DATA = SettingsProperty.createBooleanProperty("hasExtraData", false, false);
+    public static final SettingsProperty<Boolean> HAS_PVP = SettingsProperty.createBooleanProperty("hasPVP", false, false);
     public static final SettingsProperty<Boolean> HAS_MONSTERS = SettingsProperty.createBooleanProperty("hasMonsters", false, true);
     public static final SettingsProperty<Boolean> HAS_ANIMALS = SettingsProperty.createBooleanProperty("hasAnimals", false, true);
-    public static final SettingsProperty<Boolean> SHOULD_SAVE = SettingsProperty.createBooleanProperty("shouldSave", false, true);
+    public static final SettingsProperty<Boolean> SHOULD_SAVE = SettingsProperty.createBooleanProperty("shouldSave", false, false);
 
     public static final SettingsProperty<Difficulty> DIFFICULTY = SettingsProperty.createEnumProperty("difficulty", Difficulty.NORMAL, Difficulty.NORMAL, Difficulty.class);
     public static final SettingsProperty<GameMode> GAMEMODE = SettingsProperty.createEnumProperty("gamemode", GameMode.SURVIVAL, GameMode.SURVIVAL, GameMode.class);
