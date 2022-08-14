@@ -59,12 +59,12 @@ public class SlimeOutputStream extends DataOutputStream {
 
     public static final WorldVersion SUPPORTED_VERSION = WorldVersion.V1_8_R3;
 
-    public static final int CHUNK_SIZE = 2 ^ 14;
-    public static final int NIBBLE_ARRAY_SIZE = 2 ^ 11;
-    public static final int BLOCK_DATA_SIZE = 2 ^ 12;
-    public static final int SECTION_PER_CHUNK = 4 ^ 2;
-    public static final int HEIGHTMAP_SIZE = 2 ^ 8;
-    public static final int BIOME_SIZE = 2 ^ 8;
+    public static final int CHUNK_SIZE = 16384;
+    public static final int NIBBLE_ARRAY_SIZE = 2048;
+    public static final int BLOCK_DATA_SIZE = 4096;
+    public static final int SECTION_PER_CHUNK = 16;
+    public static final int HEIGHTMAP_SIZE = 256;
+    public static final int BIOME_SIZE = 256;
 
     private final SlimeWorld slimeWorld;
     private final SlimeDataRegistry dataRegistry;
