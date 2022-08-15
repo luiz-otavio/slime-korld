@@ -47,5 +47,10 @@ public class SettingsPropertyFactory {
     public static final SettingsProperty<Difficulty> DIFFICULTY = SettingsProperty.createEnumProperty("difficulty", Difficulty.NORMAL, Difficulty.NORMAL, Difficulty.class);
     public static final SettingsProperty<GameMode> GAMEMODE = SettingsProperty.createEnumProperty("gamemode", GameMode.SURVIVAL, GameMode.SURVIVAL, GameMode.class);
 
-    public static final SettingsProperty<Integer[]> SPAWN_LOCATION = SettingsProperty.createArrayProperty("spawnLocation", new Integer[3], new Integer[3], Integer.class);
+    public static final SettingsProperty<Integer[]> SPAWN_LOCATION = SettingsProperty.createArrayProperty(
+        "spawnLocation",
+        new Integer[] { 0, 50, 0 },
+        new Integer[] { 0, 50, 0 },
+        Integer.class
+    );
 }
