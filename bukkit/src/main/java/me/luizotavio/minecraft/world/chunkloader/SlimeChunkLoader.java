@@ -40,14 +40,30 @@ public class SlimeChunkLoader implements IChunkLoader {
 
     private final TLongObjectHashMap<ProtoSlimeChunk> chunks;
 
+    private final TLongObjectHashMap<Chunk> loadedChunks = new TLongObjectHashMap<>();
+
     public SlimeChunkLoader(TLongObjectHashMap<ProtoSlimeChunk> chunks) {
         this.chunks = chunks;
     }
 
     @Override
     public Chunk a(World world, int i, int i1) throws IOException {
-        return ((WorldServer) world).chunkProviderServer
-            .emptyChunk;
+        long hash = LongHash.toLong(i, i1);
+
+        if (loadedChunks.containsKey(hash)) {
+            return loadedChunks.get(hash);
+        } else {
+            ProtoSlimeChunk chunk = chunks.get(hash);
+
+            if (chunk == null) {
+                return null;
+            }
+
+            Chunk target = chunk.toChunk(world);
+            loadedChunks.put(hash, target);
+
+            return target;
+        }
     }
 
     /**
@@ -70,25 +86,5 @@ public class SlimeChunkLoader implements IChunkLoader {
 
     @Override
     public void b() {
-    }
-
-    /**
-     * Loads all chunks from the file system.
-     *
-     * @param craftSlimeWorld The world to load the chunk into.
-     */
-    public void loadAll(CraftSlimeWorld craftSlimeWorld) {
-        ChunkProviderServer chunkProviderServer = craftSlimeWorld.chunkProviderServer;
-
-        for (ProtoSlimeChunk chunk : chunks.valueCollection()) {
-            Chunk target = chunk.toChunk(craftSlimeWorld);
-
-            chunkProviderServer.chunks.put(
-                LongHash.toLong(target.locX, target.locZ),
-                target
-            );
-
-            target.addEntities();
-        }
     }
 }
