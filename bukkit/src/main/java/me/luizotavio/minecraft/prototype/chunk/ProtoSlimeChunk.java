@@ -119,9 +119,4 @@ public class ProtoSlimeChunk {
 
         return chunk;
     }
-
-
-
-
-
 }
