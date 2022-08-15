@@ -49,11 +49,12 @@ public class ProtoSlimeFile {
     private final WorldVersion worldVersion;
 
     private final int width, depth, minX, minZ;
-
     private final BitSet chunks;
 
-    private final byte[] chunkData, tileData, mapData;
-    private final byte[] entityData, extraData;
+    private final byte[] chunkData;
+
+    private final NBTTagList tileEntities, entities;
+    private final NBTTagCompound extraData, mapData;
 
     public ProtoSlimeFile(
         @NotNull WorldVersion worldVersion,
@@ -63,10 +64,10 @@ public class ProtoSlimeFile {
         int minZ,
         @NotNull BitSet chunks,
         byte[] chunkData,
-        byte[] tileData,
-        byte[] mapData,
-        byte[] entityData,
-        byte[] extraData
+        NBTTagList tileData,
+        NBTTagList entityData,
+        NBTTagCompound extraData,
+        NBTTagCompound mapData
     ) {
         this.worldVersion = worldVersion;
         this.width = width;
@@ -75,10 +76,10 @@ public class ProtoSlimeFile {
         this.minZ = minZ;
         this.chunks = chunks;
         this.chunkData = chunkData;
-        this.tileData = tileData;
         this.mapData = mapData;
-        this.entityData = entityData;
         this.extraData = extraData;
+        this.tileEntities = tileData;
+        this.entities = entityData;
     }
 
     /**
@@ -88,9 +89,6 @@ public class ProtoSlimeFile {
      * @throws IOException If an error occurs while reading the file.
      */
     public TLongObjectHashMap<ProtoSlimeChunk> getProtoChunks() throws IOException {
-        NBTTagCompound entities = readCompound(entityData),
-            tiles = readCompound(tileData);
-
         TLongObjectHashMap<ProtoSlimeChunk> protoChunks = new TLongObjectHashMap<>();
 
         ByteArrayDataInput input = ByteStreams.newDataInput(chunkData);
@@ -113,14 +111,14 @@ public class ProtoSlimeFile {
 
             input.readFully(biomeData);
 
-            byte[] sections = new byte[SECTION_PER_CHUNK >> 3];
+            byte[] sections = new byte[SECTION_PER_CHUNK / 8];
 
             input.readFully(sections);
 
             BitSet populatedSections = BitSet.valueOf(sections);
             ChunkSection[] chunkSections = new ChunkSection[SECTION_PER_CHUNK];
 
-            for (int sectionIndex = 0; sectionIndex != SECTION_PER_CHUNK; sectionIndex++) {
+            for (int sectionIndex = 0; sectionIndex <= SECTION_PER_CHUNK; sectionIndex++) {
                 if (!populatedSections.get(sectionIndex)) {
                     continue;
                 }
@@ -147,7 +145,7 @@ public class ProtoSlimeFile {
                     input.readFully(skyLight);
                 }
 
-                ChunkSection chunkSection = new ChunkSection(sectionIndex, true);
+                ChunkSection chunkSection = new ChunkSection(sectionIndex << 4, true);
 
                 chunkSection.a(
                     new NibbleArray(blockLight)
@@ -174,12 +172,9 @@ public class ProtoSlimeFile {
             protoChunks.put(LongHash.toLong(x, z), protoChunk);
         }
 
-        NBTTagList entitiesList = entities.getList("entities", 10),
-            tilesList = tiles.getList("tiles", 10);
-
-        if (!entitiesList.isEmpty()) {
-            for (int index = 0; index < entitiesList.size(); index++) {
-                NBTTagCompound entity = entitiesList.get(index);
+        if (!entities.isEmpty()) {
+            for (int index = 0; index < entities.size(); index++) {
+                NBTTagCompound entity = entities.get(index);
 
                 NBTTagList position = entity.getList("Pos", 6);
 
@@ -194,9 +189,9 @@ public class ProtoSlimeFile {
             }
         }
 
-        if(!tilesList.isEmpty()) {
-            for (int index = 0; index < tilesList.size(); index++) {
-                NBTTagCompound tile = tilesList.get(index);
+        if(!tileEntities.isEmpty()) {
+            for (int index = 0; index < tileEntities.size(); index++) {
+                NBTTagCompound tile = tileEntities.get(index);
 
                 int x = tile.getInt("x"),
                     z = tile.getInt("z");
@@ -212,13 +207,6 @@ public class ProtoSlimeFile {
         return protoChunks;
     }
 
-    public byte[] getTileData() {
-        return tileData;
-    }
-
-    public byte[] getEntityData() {
-        return entityData;
-    }
 
     public byte[] getChunkData() {
         return chunkData;
@@ -248,30 +236,12 @@ public class ProtoSlimeFile {
         return worldVersion;
     }
 
-    @NotNull
     public NBTTagCompound getWorldMaps() {
-        try {
-            return readCompound(mapData);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return mapData;
     }
 
     @Nullable
     public NBTTagCompound getExtraData() {
-        if (mapData == null) {
-            return null;
-        }
-
-        try {
-            return readCompound(extraData);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return extraData;
     }
-
-    private NBTTagCompound readCompound(byte[] src) throws IOException {
-        return NBTCompressedStreamTools.a(ByteStreams.newDataInput(src), NBTReadLimiter.a);
-    }
-
 }

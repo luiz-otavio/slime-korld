@@ -142,10 +142,10 @@ public class SlimeOutputStream extends DataOutputStream {
         BitSet bitSet = new BitSet(width * depth);
 
         for (Chunk chunk : chunks) {
-            bitSet.set(chunk.locX - minX + (chunk.locZ - minZ) * width, true);
+            bitSet.set((chunk.locZ - minZ) * width + (chunk.locX - minX) , true);
         }
 
-        int chunkSize = (int) Math.ceil((width * depth) >> 3);
+        int chunkSize = (int) Math.ceil((width * depth) / 8.0D);
 
         fromBitSet(this, bitSet, chunkSize);
 
@@ -188,13 +188,17 @@ public class SlimeOutputStream extends DataOutputStream {
 
                     Pair<byte[], NibbleArray> blockData = getBlocksId(chunkSection);
 
-                    write(blockData.getKey());
-                    write(blockData.getValue().a());
+                    dataOutputStream.write(blockData.getKey());
+                    dataOutputStream.write(blockData.getValue().a());
 
                     byte[] skyLight = chunkSection.getSkyLightArray()
                         .a();
 
                     dataOutputStream.writeBoolean(skyLight != null && skyLight.length == NIBBLE_ARRAY_SIZE);
+
+                    if (skyLight != null) {
+                        dataOutputStream.write(skyLight);
+                    }
                 }
             }
         }
@@ -238,7 +242,9 @@ public class SlimeOutputStream extends DataOutputStream {
 
         write(tileCompressed);
 
+        // Fix the boolean of has entities
         if (slimeWorld.hasProperty(SettingsPropertyFactory.HAS_ENTITIES)) {
+            writeBoolean(true);
             NBTTagList entityTagList = new NBTTagList();
 
             for (Chunk chunk : chunks) {
@@ -267,6 +273,8 @@ public class SlimeOutputStream extends DataOutputStream {
             writeInt(entityBytes.length); // Not compressed size
 
             write(entityCompressed);
+        } else {
+            writeBoolean(false);
         }
 
         if (slimeWorld.hasProperty(SettingsPropertyFactory.HAS_EXTRA_DATA)) {
@@ -338,7 +346,7 @@ public class SlimeOutputStream extends DataOutputStream {
 
         stream.write(bytes);
 
-        int padding = chunkSize - bitSet.size();
+        int padding = chunkSize - bytes.length;
 
         for (int i = 0; i < padding; i++) {
             stream.write(0);
