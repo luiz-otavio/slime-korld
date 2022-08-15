@@ -27,6 +27,7 @@ package me.luizotavio.minecraft;
 import com.google.common.collect.ImmutableSet;
 import de.tr7zw.nbtapi.NBTContainer;
 import me.luizotavio.minecraft.codec.SlimeInputStream;
+import me.luizotavio.minecraft.codec.SlimeOutputStream;
 import me.luizotavio.minecraft.common.SlimeWorld;
 import me.luizotavio.minecraft.common.data.AbstractSlimeData;
 import me.luizotavio.minecraft.common.data.registry.SlimeDataRegistry;
@@ -36,15 +37,14 @@ import me.luizotavio.minecraft.common.event.impl.SlimeWorldUnloadEvent;
 import me.luizotavio.minecraft.common.exception.InternalSlimeException;
 import me.luizotavio.minecraft.common.service.SlimeKorld;
 import me.luizotavio.minecraft.common.settings.SettingsProperty;
+import me.luizotavio.minecraft.common.settings.factory.SettingsPropertyFactory;
 import me.luizotavio.minecraft.common.strategy.SlimeLoaderStrategy;
 import me.luizotavio.minecraft.common.version.WorldVersion;
 import me.luizotavio.minecraft.data.container.BukkitSlimePersistentContainer;
 import me.luizotavio.minecraft.prototype.ProtoSlimeFile;
 import me.luizotavio.minecraft.world.CraftSlimeWorld;
 import me.luizotavio.minecraft.world.data.SlimeDataManager;
-import net.minecraft.server.v1_8_R3.MinecraftServer;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
@@ -52,6 +52,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -114,7 +115,18 @@ public class BukkitSlimeWorld implements SlimeWorld {
 
     @Override
     public <T> void setProperty(@NotNull SettingsProperty<T> property, @NotNull T value) {
-        properties.put(property.getName(), property.clone());
+        SettingsProperty current = properties.get(property.getName());
+
+        if (current != null) {
+            current.setValue(value);
+        } else {
+            SettingsProperty clone = property.clone();
+
+            // Fixed the bug of the property not being cloned and updated with the new value
+            clone.setValue(value);
+
+            properties.put(property.getName(), clone);
+        }
     }
 
     @Override
@@ -163,6 +175,22 @@ public class BukkitSlimeWorld implements SlimeWorld {
             throw new InternalSlimeException("World unload cancelled");
         }
 
+        if (getProperty(SettingsPropertyFactory.SHOULD_SAVE)) {
+            SlimeKorld slimeKorld = getKorld();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+            try (SlimeOutputStream slimeOutputStream = new SlimeOutputStream(outputStream, this, slimeKorld.getDataRegistry())) {
+                slimeOutputStream.write();
+            } catch (Exception e) {
+                throw new InternalSlimeException("Failed to save world data", e);
+            }
+
+            byte[] data = outputStream.toByteArray();
+
+            slimeKorld.getLoaderStrategy().save(this, data);
+            System.out.println("saving world data");
+        }
+
         Bukkit.unloadWorld(world, true);
     }
 
@@ -176,6 +204,10 @@ public class BukkitSlimeWorld implements SlimeWorld {
             .getLoaderStrategy();
 
         byte[] data = loader.load(name, false);
+
+        if (data == null) {
+            throw new InternalSlimeException("World data not found");
+        }
 
         ProtoSlimeFile protoSlimeFile;
 
@@ -233,6 +265,19 @@ public class BukkitSlimeWorld implements SlimeWorld {
             for (AbstractSlimeData slimeData : registry.getRegistered()) {
                 slimeData.deserialize(this, persistentContainer);
             }
+        }
+
+        // Fix world maps
+        NBTTagCompound worldMaps = protoSlimeFile.getWorldMaps();
+        NBTTagList maps = worldMaps.getList("maps", 10);
+
+        for (int i = 0; i < maps.size(); i++) {
+            NBTTagCompound map = maps.get(i);
+
+            WorldMap worldMap = new WorldMap("map_" + map.getInt("id"));
+            worldMap.a(map);
+
+            craftWorld.worldMaps.a(worldMap.id, worldMap);
         }
 
         return craftWorld.getWorld();

@@ -1,0 +1,6 @@
+name: SlimeKorldPlugin
+version: 1.8.8-R0.1-SNAPSHOT
+main: me.luizotavio.minecraft.plugin.SlimePlugin
+load: POSTWORLD
+authors:
+    - luiz-otavio

@@ -25,11 +25,15 @@
 package me.luizotavio.minecraft.codec;
 
 import com.github.luben.zstd.Zstd;
+import com.google.common.io.ByteStreams;
 import me.luizotavio.minecraft.common.exception.InternalSlimeException;
 import me.luizotavio.minecraft.common.settings.SettingsProperty;
-import me.luizotavio.minecraft.common.settings.factory.SettingsPropertyFactory;
 import me.luizotavio.minecraft.common.version.WorldVersion;
 import me.luizotavio.minecraft.prototype.ProtoSlimeFile;
+import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
+import net.minecraft.server.v1_8_R3.NBTReadLimiter;
+import net.minecraft.server.v1_8_R3.NBTTagCompound;
+import net.minecraft.server.v1_8_R3.NBTTagList;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.DataInputStream;
@@ -39,8 +43,8 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Set;
 
+import static me.luizotavio.minecraft.common.version.SlimeVersion.CURRENT_SLIME_VERSION;
 import static me.luizotavio.minecraft.common.version.SlimeVersion.SLIME_MAGIC_HEADER;
-import static org.apache.commons.lang.ArrayUtils.EMPTY_BYTE_ARRAY;
 
 /**
  * @author Luiz Otávio de Farias Corrêa
@@ -75,6 +79,13 @@ public class SlimeInputStream extends DataInputStream {
             throw new InternalSlimeException("Invalid magic header");
         }
 
+        // Fix slime version
+        byte slimeVersion = readByte();
+
+        if (slimeVersion != CURRENT_SLIME_VERSION) {
+            throw new InternalSlimeException("That slime version isn't supported.");
+        }
+
         byte version = readByte();
 
         if (version == 0) {
@@ -97,7 +108,7 @@ public class SlimeInputStream extends DataInputStream {
             throw new InternalSlimeException("Invalid depth or width");
         }
 
-        byte[] populatedChunks = new byte[(width * depth) >> 3];
+        byte[] populatedChunks = new byte[(int) Math.ceil((width * depth) / 8.0D)];
 
         success = read(populatedChunks);
 
@@ -112,12 +123,12 @@ public class SlimeInputStream extends DataInputStream {
 
         boolean hasEntities = readBoolean();
 
-        byte[] uncompressedEntities;
+        NBTTagList uncompressedEntities;
 
-        if (hasEntities && properties.contains(SettingsPropertyFactory.HAS_ENTITIES)) {
-            uncompressedEntities = readCompressed();
+        if (hasEntities) {
+            uncompressedEntities = readList(readCompressed(), "entities");
         } else {
-            uncompressedEntities = EMPTY_BYTE_ARRAY;
+            uncompressedEntities = new NBTTagList();
         }
 
         byte[] extraData = readCompressed(),
@@ -137,10 +148,10 @@ public class SlimeInputStream extends DataInputStream {
             minZ,
             bitSet,
             uncompressedChunks,
-            uncompressedTiles,
-            isExtra ? mapData : extraData,
+            readList(uncompressedTiles, "tiles"),
             uncompressedEntities,
-            isExtra ? extraData : null
+            isExtra ? readCompound(extraData) : null,
+            !isExtra ? readCompound(extraData) : null
         );
     }
 
@@ -157,5 +168,14 @@ public class SlimeInputStream extends DataInputStream {
         }
 
         return Zstd.decompress(compressed, uncompressedSize);
+    }
+
+    private NBTTagCompound readCompound(byte[] src) throws IOException {
+        return NBTCompressedStreamTools.a(ByteStreams.newDataInput(src), NBTReadLimiter.a);
+    }
+
+    private NBTTagList readList(byte[] src, String key) throws IOException {
+        NBTTagCompound compound = readCompound(src);
+        return compound.getList(key, 10);
     }
 }

@@ -59,12 +59,12 @@ public class SlimeOutputStream extends DataOutputStream {
 
     public static final WorldVersion SUPPORTED_VERSION = WorldVersion.V1_8_R3;
 
-    public static final int CHUNK_SIZE = 2 ^ 14;
-    public static final int NIBBLE_ARRAY_SIZE = 2 ^ 11;
-    public static final int BLOCK_DATA_SIZE = 2 ^ 12;
-    public static final int SECTION_PER_CHUNK = 4 ^ 2;
-    public static final int HEIGHTMAP_SIZE = 2 ^ 8;
-    public static final int BIOME_SIZE = 2 ^ 8;
+    public static final int CHUNK_SIZE = 16384;
+    public static final int NIBBLE_ARRAY_SIZE = 2048;
+    public static final int BLOCK_DATA_SIZE = 4096;
+    public static final int SECTION_PER_CHUNK = 16;
+    public static final int HEIGHTMAP_SIZE = 256;
+    public static final int BIOME_SIZE = 256;
 
     private final SlimeWorld slimeWorld;
     private final SlimeDataRegistry dataRegistry;
@@ -142,10 +142,10 @@ public class SlimeOutputStream extends DataOutputStream {
         BitSet bitSet = new BitSet(width * depth);
 
         for (Chunk chunk : chunks) {
-            bitSet.set(chunk.locX - minX + (chunk.locZ - minZ) * width, true);
+            bitSet.set((chunk.locZ - minZ) * width + (chunk.locX - minX) , true);
         }
 
-        int chunkSize = (int) Math.ceil((width * depth) >> 3);
+        int chunkSize = (int) Math.ceil((width * depth) / 8.0D);
 
         fromBitSet(this, bitSet, chunkSize);
 
@@ -188,13 +188,17 @@ public class SlimeOutputStream extends DataOutputStream {
 
                     Pair<byte[], NibbleArray> blockData = getBlocksId(chunkSection);
 
-                    write(blockData.getKey());
-                    write(blockData.getValue().a());
+                    dataOutputStream.write(blockData.getKey());
+                    dataOutputStream.write(blockData.getValue().a());
 
                     byte[] skyLight = chunkSection.getSkyLightArray()
                         .a();
 
                     dataOutputStream.writeBoolean(skyLight != null && skyLight.length == NIBBLE_ARRAY_SIZE);
+
+                    if (skyLight != null) {
+                        dataOutputStream.write(skyLight);
+                    }
                 }
             }
         }
@@ -238,7 +242,9 @@ public class SlimeOutputStream extends DataOutputStream {
 
         write(tileCompressed);
 
+        // Fix the boolean of has entities
         if (slimeWorld.hasProperty(SettingsPropertyFactory.HAS_ENTITIES)) {
+            writeBoolean(true);
             NBTTagList entityTagList = new NBTTagList();
 
             for (Chunk chunk : chunks) {
@@ -267,6 +273,8 @@ public class SlimeOutputStream extends DataOutputStream {
             writeInt(entityBytes.length); // Not compressed size
 
             write(entityCompressed);
+        } else {
+            writeBoolean(false);
         }
 
         if (slimeWorld.hasProperty(SettingsPropertyFactory.HAS_EXTRA_DATA)) {
@@ -338,7 +346,7 @@ public class SlimeOutputStream extends DataOutputStream {
 
         stream.write(bytes);
 
-        int padding = chunkSize - bitSet.size();
+        int padding = chunkSize - bytes.length;
 
         for (int i = 0; i < padding; i++) {
             stream.write(0);

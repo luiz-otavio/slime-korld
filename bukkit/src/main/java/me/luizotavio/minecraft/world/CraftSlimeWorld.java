@@ -90,9 +90,6 @@ public class CraftSlimeWorld extends WorldServer {
         );
 
         this.pvpMode = slimeWorld.getProperty(SettingsPropertyFactory.HAS_PVP);
-
-        SlimeChunkLoader slimeChunkLoader = (SlimeChunkLoader) idatamanager.createChunkLoader(worldProvider);
-        slimeChunkLoader.loadAll(this);
     }
 
     @Override
