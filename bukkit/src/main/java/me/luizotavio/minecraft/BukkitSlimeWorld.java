@@ -115,7 +115,18 @@ public class BukkitSlimeWorld implements SlimeWorld {
 
     @Override
     public <T> void setProperty(@NotNull SettingsProperty<T> property, @NotNull T value) {
-        properties.put(property.getName(), property.clone());
+        SettingsProperty current = properties.get(property.getName());
+
+        if (current != null) {
+            current.setValue(value);
+        } else {
+            SettingsProperty clone = property.clone();
+
+            // Fixed the bug of the property not being cloned and updated with the new value
+            clone.setValue(value);
+
+            properties.put(property.getName(), clone);
+        }
     }
 
     @Override
@@ -177,6 +188,7 @@ public class BukkitSlimeWorld implements SlimeWorld {
             byte[] data = outputStream.toByteArray();
 
             slimeKorld.getLoaderStrategy().save(this, data);
+            System.out.println("saving world data");
         }
 
         Bukkit.unloadWorld(world, true);

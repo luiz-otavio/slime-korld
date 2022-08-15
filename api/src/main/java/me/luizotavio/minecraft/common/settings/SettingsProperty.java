@@ -38,9 +38,10 @@ public abstract class SettingsProperty<T> implements Cloneable {
 
     /**
      * Create a string property.
-     * @param name The name of the property.
+     *
+     * @param name         The name of the property.
      * @param defaultValue The default value of the property.
-     * @param value The value of the property.
+     * @param value        The value of the property.
      * @return The property.
      */
     public static SettingsProperty<String> createStringProperty(String name, String defaultValue, @Nullable String value) {
@@ -49,12 +50,13 @@ public abstract class SettingsProperty<T> implements Cloneable {
 
     /**
      * Create an enum property.
-     * @param name The name of the property.
+     *
+     * @param name         The name of the property.
      * @param defaultValue The default value of the property.
-     * @param value The value of the property.
-     * @param clazz The class of the enum.
+     * @param value        The value of the property.
+     * @param clazz        The class of the enum.
+     * @param <T>          The type of the enum.
      * @return The property.
-     * @param <T> The type of the enum.
      */
     public static <T extends Enum<T>> SettingsProperty<T> createEnumProperty(String name, T defaultValue, @Nullable T value, @NotNull Class<T> clazz) {
         return new EnumProperty<>(name, value == null ? defaultValue : value, defaultValue, clazz);
@@ -62,12 +64,13 @@ public abstract class SettingsProperty<T> implements Cloneable {
 
     /**
      * Create an array based property.
-     * @param name The name of the property.
+     *
+     * @param name         The name of the property.
      * @param defaultValue The default value of the property.
-     * @param value The value of the property.
-     * @param clazz The class of the array.
+     * @param value        The value of the property.
+     * @param clazz        The class of the array.
+     * @param <T>          The type of the array.
      * @return The property.
-     * @param <T> The type of the array.
      */
     public static <T> SettingsProperty<T[]> createArrayProperty(String name, T[] defaultValue, @Nullable T[] value, @NotNull Class<T> clazz) {
         return new ArrayProperty<>(name, value == null ? defaultValue : value, defaultValue, clazz);
@@ -75,9 +78,10 @@ public abstract class SettingsProperty<T> implements Cloneable {
 
     /**
      * Create an integer property.
-     * @param name The name of the property.
+     *
+     * @param name         The name of the property.
      * @param defaultValue The default value of the property.
-     * @param value The value of the property.
+     * @param value        The value of the property.
      * @return The property.
      */
     public static SettingsProperty<Integer> createIntegerProperty(String name, int defaultValue, int value) {
@@ -86,9 +90,10 @@ public abstract class SettingsProperty<T> implements Cloneable {
 
     /**
      * Create a boolean property.
-     * @param name The name of the property.
+     *
+     * @param name         The name of the property.
      * @param defaultValue The default value of the property.
-     * @param value The value of the property.
+     * @param value        The value of the property.
      * @return The property.
      */
     public static SettingsProperty<Boolean> createBooleanProperty(String name, boolean defaultValue, boolean value) {
@@ -97,6 +102,7 @@ public abstract class SettingsProperty<T> implements Cloneable {
 
     /**
      * Retrieve the name of the property.
+     *
      * @return The name of the property.
      */
     @NotNull
@@ -104,13 +110,22 @@ public abstract class SettingsProperty<T> implements Cloneable {
 
     /**
      * Retrieve the current value of the property.
+     *
      * @return The current value of the property.
      */
     @NotNull
     public abstract T getValue();
 
     /**
+     * Update the value of the property.
+     *
+     * @param value The new value of the property.
+     */
+    public abstract void setValue(@NotNull T value);
+
+    /**
      * Retrieve the default value of the property.
+     *
      * @return The default value of the property.
      */
     @NotNull
@@ -142,7 +157,7 @@ public abstract class SettingsProperty<T> implements Cloneable {
     public static class BooleanProperty extends SettingsProperty<Boolean> {
 
         private final String name;
-        private final Boolean value;
+        private Boolean value;
         private final Boolean defaultValue;
 
         public BooleanProperty(String name, Boolean value, Boolean defaultValue) {
@@ -162,7 +177,12 @@ public abstract class SettingsProperty<T> implements Cloneable {
         }
 
         @Override
-        public Boolean getDefaultValue() {
+        public void setValue(@NotNull Boolean value) {
+            this.value = value;
+        }
+
+        @Override
+        public @NotNull Boolean getDefaultValue() {
             return defaultValue;
         }
 
@@ -171,7 +191,7 @@ public abstract class SettingsProperty<T> implements Cloneable {
     public static class StringProperty extends SettingsProperty<String> {
 
         private final String name;
-        private final String value;
+        private String value;
         private final String defaultValue;
 
         public StringProperty(String name, String value, String defaultValue) {
@@ -191,7 +211,12 @@ public abstract class SettingsProperty<T> implements Cloneable {
         }
 
         @Override
-        public String getDefaultValue() {
+        public void setValue(@NotNull String value) {
+            this.value = value;
+        }
+
+        @Override
+        public @NotNull String getDefaultValue() {
             return defaultValue;
         }
 
@@ -200,7 +225,7 @@ public abstract class SettingsProperty<T> implements Cloneable {
     public static class IntegerProperty extends SettingsProperty<Integer> {
 
         private final String name;
-        private final Integer value;
+        private Integer value;
         private final Integer defaultValue;
 
         public IntegerProperty(String name, Integer value, Integer defaultValue) {
@@ -220,7 +245,12 @@ public abstract class SettingsProperty<T> implements Cloneable {
         }
 
         @Override
-        public Integer getDefaultValue() {
+        public void setValue(@NotNull Integer value) {
+            this.value = value;
+        }
+
+        @Override
+        public @NotNull Integer getDefaultValue() {
             return defaultValue;
         }
     }
@@ -228,7 +258,7 @@ public abstract class SettingsProperty<T> implements Cloneable {
     public static class EnumProperty<E extends Enum<E>> extends SettingsProperty<E> {
 
         private final String name;
-        private final E value;
+        private E value;
         private final E defaultValue;
         private final Class<E> enumClass;
 
@@ -250,7 +280,12 @@ public abstract class SettingsProperty<T> implements Cloneable {
         }
 
         @Override
-        public E getDefaultValue() {
+        public void setValue(@NotNull E value) {
+            this.value = value;
+        }
+
+        @Override
+        public @NotNull E getDefaultValue() {
             return defaultValue;
         }
 
@@ -262,7 +297,7 @@ public abstract class SettingsProperty<T> implements Cloneable {
     public static class ArrayProperty<T> extends SettingsProperty<T[]> {
 
         private final String name;
-        private final T[] value;
+        private T[] value;
         private final T[] defaultValue;
         private final Class<T> arrayClass;
 
@@ -284,7 +319,12 @@ public abstract class SettingsProperty<T> implements Cloneable {
         }
 
         @Override
-        public T[] getDefaultValue() {
+        public void setValue(T @NotNull [] value) {
+            this.value = value;
+        }
+
+        @Override
+        public T @NotNull [] getDefaultValue() {
             return defaultValue;
         }
 
