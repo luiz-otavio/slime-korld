@@ -3,7 +3,7 @@ This library is still in development and should not be used in production.
 Since I'm so tired of writing documentation, I'm going to write it in markdown.
 
 # Slime Korld
-[![](https://jitpack.io/v/luiz-otavio/slime-korld.svg)](https://jitpack.io/#luiz-otavio/slime-korld)
+![ezgif-5-462d16c33c_1](https://user-images.githubusercontent.com/65752397/185532946-2aeb1c89-eee9-4324-8f72-087177edaa1e.gif)
 
 Bukkit library to implement the Slime World Format from Hypixel.
 
