@@ -55,7 +55,8 @@ public class SlimeCommand {
             new String[]{
                 "§aSlime world testing version: §e" + Bukkit.getVersion(),
                 "§aType /slime convert - to convert your world to the new format",
-                "§aType /slime save - to save your world"
+                "§aType /slime save - to save your world",
+                " "
             }
         );
     }

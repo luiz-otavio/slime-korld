@@ -120,7 +120,7 @@ public class BukkitSlimeKorld implements SlimeKorld {
     }
 
     @Override
-    public void setLoaderStrategy(SlimeLoaderStrategy loaderStrategy) {
+    public void setLoaderStrategy(@NotNull SlimeLoaderStrategy loaderStrategy) {
         this.slimeLoaderStrategy = loaderStrategy;
     }
 }

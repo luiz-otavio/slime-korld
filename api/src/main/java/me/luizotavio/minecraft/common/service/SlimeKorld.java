@@ -29,6 +29,7 @@ import me.luizotavio.minecraft.common.factory.SlimeWorldFactory;
 import me.luizotavio.minecraft.common.strategy.SlimeLoaderStrategy;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Service to be registered in services manager.
@@ -39,18 +40,49 @@ import org.bukkit.plugin.Plugin;
  */
 public interface SlimeKorld {
 
+    /**
+     * Retrieve the current holder of the service.
+     * @return The plugin that is holding the service.
+     */
     Plugin getHolder();
 
+    /**
+     * Retrieve the logger of the service.
+     * @return The logger of the service.
+     */
     Logger getLogger();
+
+    /**
+     * Retrieve the version of the service.
+     * @return The version of the service.
+     */
 
     String getVersion();
 
+    /**
+     * Retrieve the factory of the service.
+     * @return The factory of the service.
+     */
+
     SlimeWorldFactory getFactory();
 
+    /**
+     * Retrieve the data registry of the service.
+     * @return The data registry of the service.
+     */
     SlimeDataRegistry getDataRegistry();
+
+    /**
+     * Retrieve the loader strategy of the service.
+     * @return The loader strategy of the service.
+     */
 
     SlimeLoaderStrategy getLoaderStrategy();
 
-    void setLoaderStrategy(SlimeLoaderStrategy loaderStrategy);
+    /**
+     * Update the current loader strategy of the service.
+     * @param loaderStrategy The new loader strategy.
+     */
+    void setLoaderStrategy(@NotNull SlimeLoaderStrategy loaderStrategy);
 
 }
