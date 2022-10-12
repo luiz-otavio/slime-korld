@@ -27,8 +27,6 @@ publishing {
         create<MavenPublication>("Jitpack") {
             project.shadow.component(this)
 
-            from(components["java"])
-
             groupId = "me.luizotavio.minecraft"
             artifactId = "slime-korld"
             version = Versions.minecraftVersion
