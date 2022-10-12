@@ -20,6 +20,6 @@ subprojects {
     }
 
     dependencies {
-        implementation("org.jetbrains:annotations:16.0.2")
+        implementation("org.jetbrains:annotations:23.0.0")
     }
 }
