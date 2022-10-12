@@ -1,44 +1,21 @@
-import org.gradle.internal.impldep.org.apache.commons.lang.StringUtils
+import me.luizotavio.minecraft.gradle.*
 
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("com.github.johnrengelman.shadow") version Versions.shadowJar
     id("maven-publish")
 }
 
-repositories {
-    maven {
-        name = "elmakers"
-        url = uri("https://maven.elmakers.com/repository/")
-    }
-
-    maven {
-        name = "codemc"
-        url = uri("https://repo.codemc.org/repository/maven-public/")
-    }
-}
-
-val minecraftVersion = "1.8.8-R0.1-SNAPSHOT"
-val zstdVersion = "1.5.2-3"
-val nbtApi = "2.10.0"
+setupMinecraft()
 
 dependencies {
-    compileOnly("org.spigotmc:spigot:$minecraftVersion")
-
-    implementation(
-        project(":api")
+    implCollection(
+        project(":api"),
+        "com.github.luben:zstd-jni:${Versions.zstdVersion}",
+        "de.tr7zw:item-nbt-api-plugin:${Versions.nbtApi}"
     )
-
-    implementation("com.github.luben:zstd-jni:$zstdVersion")
-    implementation("de.tr7zw:item-nbt-api-plugin:$nbtApi")
-}
-
-tasks.getByName("jar") {
-    enabled = false
 }
 
 tasks.shadowJar {
-    archiveClassifier.set(StringUtils.EMPTY)
-
     // Exclude plugin-yml due to item-nbt-api
     minimize {
         exclude("*.yml")
@@ -50,9 +27,11 @@ publishing {
         create<MavenPublication>("Jitpack") {
             project.shadow.component(this)
 
+            from(components["java"])
+
             groupId = "me.luizotavio.minecraft"
             artifactId = "slime-korld"
-            version = minecraftVersion
+            version = Versions.minecraftVersion
 
             pom {
                 licenses {
@@ -63,6 +42,14 @@ publishing {
                 }
 
                 url.set("https://github.com/luiz-otavio")
+
+                developers {
+                    developer {
+                        id.set("luiz-otavio")
+                        name.set("Luiz Otavio")
+                        email.set("luizfarrea@gmail.com")
+                    }
+                }
             }
         }
     }
