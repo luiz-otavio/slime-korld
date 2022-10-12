@@ -31,10 +31,15 @@ import org.jetbrains.annotations.NotNull;
 import java.util.EnumSet;
 
 /**
+ * Available data types for slime data.
+ *
  * @author Luiz Otávio de Farias Corrêa
  * @since 11/08/2022
  */
 public enum SlimeDataType {
+    /**
+     * Common data type for string entries.
+     */
     STRING(new DataCodec<String>() {
         @Override
         public String decode(@NotNull String key, @NotNull NBTCompound inputStream) {
@@ -46,6 +51,9 @@ public enum SlimeDataType {
             inputStream.setString(key, value);
         }
     }),
+    /**
+     * Common data type for boolean entries.
+     */
     BOOLEAN(new DataCodec<Boolean>() {
         @Override
         public Boolean decode(@NotNull String key, @NotNull NBTCompound inputStream) {
@@ -57,6 +65,9 @@ public enum SlimeDataType {
             inputStream.setBoolean(key, value);
         }
     }),
+    /**
+     * Common data type for byte entries.
+     */
     BYTE(new DataCodec<Byte>() {
         @Override
         public Byte decode(@NotNull String key, @NotNull NBTCompound inputStream) {
@@ -68,6 +79,9 @@ public enum SlimeDataType {
             inputStream.setByte(key, value);
         }
     }),
+    /**
+     * Common data type for short entries.
+     */
     SHORT(new DataCodec<Short>() {
         @Override
         public Short decode(@NotNull String key, @NotNull NBTCompound inputStream) {
@@ -79,6 +93,9 @@ public enum SlimeDataType {
             inputStream.setShort(key, value);
         }
     }),
+    /**
+     * Common data type for integer entries.
+     */
     INTEGER(new DataCodec<Integer>() {
         @Override
         public Integer decode(@NotNull String key, @NotNull NBTCompound inputStream) {
@@ -90,6 +107,9 @@ public enum SlimeDataType {
             inputStream.setInteger(key, value);
         }
     }),
+    /**
+     * Common data type for long entries.
+     */
     LONG(new DataCodec<Long>() {
         @Override
         public Long decode(@NotNull String key, @NotNull NBTCompound inputStream) {
@@ -101,6 +121,9 @@ public enum SlimeDataType {
             inputStream.setLong(key, value);
         }
     }),
+    /**
+     * Common data type for float entries.
+     */
     FLOAT(new DataCodec<Float>() {
         @Override
         public Float decode(@NotNull String key, @NotNull NBTCompound inputStream) {
@@ -112,6 +135,9 @@ public enum SlimeDataType {
             inputStream.setFloat(key, value);
         }
     }),
+    /**
+     * Common data type for double entries.
+     */
     DOUBLE(new DataCodec<Double>() {
         @Override
         public Double decode(@NotNull String key, @NotNull NBTCompound inputStream) {
@@ -123,6 +149,9 @@ public enum SlimeDataType {
             inputStream.setDouble(key, value);
         }
     }),
+    /**
+     * Common data type for byte array entries.
+     */
     CHAR(new DataCodec<Character>() {
         @Override
         public Character decode(@NotNull String key, @NotNull NBTCompound inputStream) {
@@ -135,6 +164,9 @@ public enum SlimeDataType {
             inputStream.setString(key, value.toString());
         }
     }),
+    /**
+     * Common data type for byte array entries.
+     */
     BYTE_ARRAY(new DataCodec<byte[]>() {
         @Override
         public byte[] decode(@NotNull String key, @NotNull NBTCompound inputStream) {
@@ -142,10 +174,13 @@ public enum SlimeDataType {
         }
 
         @Override
-        public void encode(@NotNull String key, @NotNull byte[] value, @NotNull NBTCompound inputStream) {
+        public void encode(@NotNull String key, byte @NotNull[] value, @NotNull NBTCompound inputStream) {
             inputStream.setByteArray(key, value);
         }
     }),
+    /**
+     * Common data type for integer array entries.
+     */
     COMPOUND(new DataCodec<NBTCompound>() {
         @Override
         public NBTCompound decode(@NotNull String key, @NotNull NBTCompound inputStream) {
@@ -159,16 +194,6 @@ public enum SlimeDataType {
             compound.mergeCompound(value);
         }
     });
-
-    private static final EnumSet<NBTType> SUPPORTED_NBT_TYPES = EnumSet.of(
-        NBTType.NBTTagCompound,
-        NBTType.NBTTagString,
-        NBTType.NBTTagInt,
-        NBTType.NBTTagLong,
-        NBTType.NBTTagFloat,
-        NBTType.NBTTagDouble,
-        NBTType.NBTTagIntArray
-    );
 
     private final DataCodec<?> dataCodec;
 

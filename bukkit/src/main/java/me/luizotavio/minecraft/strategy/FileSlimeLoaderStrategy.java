@@ -85,6 +85,10 @@ public class FileSlimeLoaderStrategy implements SlimeLoaderStrategy {
     @Override
     public void save(SlimeWorld slimeWorld, byte[] data) throws InternalSlimeException {
         File file = new File(folder, slimeWorld.getName() + ".slime");
+        // Delete the file if it already exists
+        if (file.exists()) {
+            file.delete();
+        }
 
         Path path = file.toPath();
         try {

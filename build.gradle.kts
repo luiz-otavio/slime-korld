@@ -11,7 +11,7 @@ subprojects {
     }
 
     // Change charset to UTF-8
-    tasks.withType<JavaCompile>() {
+    tasks.withType<JavaCompile> {
         options.encoding = "UTF-8"
     }
 
@@ -20,6 +20,6 @@ subprojects {
     }
 
     dependencies {
-        implementation("org.jetbrains:annotations:16.0.2")
+        implementation("org.jetbrains:annotations:23.0.0")
     }
 }

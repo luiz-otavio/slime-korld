@@ -24,16 +24,19 @@
 
 package me.luizotavio.minecraft.common.data;
 
+import com.google.common.annotations.Beta;
 import me.luizotavio.minecraft.common.SlimeWorld;
 import me.luizotavio.minecraft.common.data.container.SlimePersistentContainer;
 import org.bukkit.plugin.Plugin;
 
 /**
- * Extra data for slime worlds.
+ * Abstraction for storing extra data in a {@link SlimeWorld}.
+ * It's currently in Beta, but you can use it.
  *
  * @author Luiz Otávio de Farias Corrêa
  * @since 11/08/2022
  */
+@Beta
 public abstract class AbstractSlimeData {
 
     private final Plugin plugin;

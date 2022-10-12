@@ -38,10 +38,27 @@ import org.bukkit.plugin.Plugin;
  */
 public interface SlimeLoaderStrategy {
 
+    /**
+     * Retrieve the current holder of the loader strategy.
+     * @return The plugin that is holding the loader strategy.
+     */
     Plugin getPlugin();
 
+    /**
+     * Load and retrieve the compressed data of the world.
+     * @param name The name of the world.
+     * @param force If the world should be forced to be loaded.
+     * @return The compressed data of the world.
+     * @throws InternalSlimeException If the world is not found.
+     */
     byte[] load(String name, boolean force) throws InternalSlimeException;
 
+    /**
+     * Save the compressed data of the world.
+     * @param slimeWorld The slime world to be saved.
+     * @param data The compressed data of the world.
+     * @throws InternalSlimeException If the world is not found.
+     */
     void save(SlimeWorld slimeWorld, byte[] data) throws InternalSlimeException;
 
 }
