@@ -1,4 +1,4 @@
-rootProject.name = "rewrite-slime-korld"
+rootProject.name = "slime-korld"
 
 include(
     "api",
