@@ -16,6 +16,9 @@ dependencies {
 }
 
 tasks.shadowJar {
+    // This is a workaround for a bug in the shadow plugin
+    archiveClassifier.set("")
+
     // Exclude plugin-yml due to item-nbt-api
     minimize {
         exclude("*.yml")
