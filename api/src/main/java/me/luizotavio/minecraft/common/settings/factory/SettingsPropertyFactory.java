@@ -44,6 +44,7 @@ public class SettingsPropertyFactory {
     public static final SettingsProperty<Boolean> HAS_ANIMALS = SettingsProperty.createBooleanProperty("hasAnimals", false, true);
     public static final SettingsProperty<Boolean> SHOULD_SAVE = SettingsProperty.createBooleanProperty("shouldSave", false, false);
 
+    public static final SettingsProperty<Boolean> INITIALIZE_ALL_CHUNKS = SettingsProperty.createBooleanProperty("initializeAllChunks", false, false);
     public static final SettingsProperty<Difficulty> DIFFICULTY = SettingsProperty.createEnumProperty("difficulty", Difficulty.NORMAL, Difficulty.NORMAL, Difficulty.class);
     public static final SettingsProperty<GameMode> GAMEMODE = SettingsProperty.createEnumProperty("gamemode", GameMode.SURVIVAL, GameMode.SURVIVAL, GameMode.class);
 

@@ -41,6 +41,7 @@ import me.luizotavio.minecraft.common.settings.factory.SettingsPropertyFactory;
 import me.luizotavio.minecraft.common.strategy.SlimeLoaderStrategy;
 import me.luizotavio.minecraft.common.version.WorldVersion;
 import me.luizotavio.minecraft.data.container.BukkitSlimePersistentContainer;
+import me.luizotavio.minecraft.generator.EmptyWorldGenerator;
 import me.luizotavio.minecraft.prototype.ProtoSlimeFile;
 import me.luizotavio.minecraft.world.CraftSlimeWorld;
 import me.luizotavio.minecraft.world.data.SlimeDataManager;
@@ -48,11 +49,13 @@ import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R3.util.LongHash;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -188,7 +191,6 @@ public class BukkitSlimeWorld implements SlimeWorld {
             byte[] data = outputStream.toByteArray();
 
             slimeKorld.getLoaderStrategy().save(this, data);
-            System.out.println("saving world data");
         }
 
         Bukkit.unloadWorld(world, true);
@@ -241,6 +243,26 @@ public class BukkitSlimeWorld implements SlimeWorld {
             dataManager,
             dimension
         );
+
+        craftWorld.generator = new EmptyWorldGenerator();
+
+        if (hasProperty(SettingsPropertyFactory.INITIALIZE_ALL_CHUNKS)) {
+            try {
+                for (long key : protoSlimeFile.getProtoChunks().keys()) {
+                    int x = LongHash.msw(key),
+                        z = LongHash.lsw(key);
+
+                    Chunk chunk = dataManager.createChunkLoader(null)
+                        .a(craftWorld, x, z);
+
+                    craftWorld.chunkProviderServer
+                        .chunks
+                        .put(key, chunk);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         SlimeWorldInitializeEvent event = new SlimeWorldInitializeEvent(this, craftWorld.getWorld())
             .call();
