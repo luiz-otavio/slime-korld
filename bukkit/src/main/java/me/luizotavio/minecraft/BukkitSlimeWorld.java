@@ -197,7 +197,7 @@ public class BukkitSlimeWorld implements SlimeWorld {
     @Override
     public @Nullable World initialize() throws InternalSlimeException {
         if (getBukkitWorld() != null) {
-           throw new InternalSlimeException("World already exists");
+            throw new InternalSlimeException("World already exists");
         }
 
         SlimeLoaderStrategy loader = getKorld()
@@ -254,17 +254,15 @@ public class BukkitSlimeWorld implements SlimeWorld {
 
         NBTTagCompound extraData = protoSlimeFile.getExtraData();
 
-        if (extraData != null) {
-            SlimeDataRegistry registry = getKorld()
-                .getDataRegistry();
+        SlimeDataRegistry registry = getKorld()
+            .getDataRegistry();
 
-            BukkitSlimePersistentContainer persistentContainer = new BukkitSlimePersistentContainer(
-                new NBTContainer(extraData)
-            );
+        BukkitSlimePersistentContainer persistentContainer = new BukkitSlimePersistentContainer(
+            new NBTContainer(extraData)
+        );
 
-            for (AbstractSlimeData slimeData : registry.getRegistered()) {
-                slimeData.deserialize(this, persistentContainer);
-            }
+        for (AbstractSlimeData slimeData : registry.getRegistered()) {
+            slimeData.deserialize(this, persistentContainer);
         }
 
         // Fix world maps

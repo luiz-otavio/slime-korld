@@ -150,8 +150,8 @@ public class SlimeInputStream extends DataInputStream {
             uncompressedChunks,
             readList(uncompressedTiles, "tiles"),
             uncompressedEntities,
-            isExtra ? readCompound(extraData) : null,
-            !isExtra ? readCompound(extraData) : null
+            !isExtra ? new NBTTagCompound() : readCompound(extraData),
+            isExtra ? readCompound(mapData) : readCompound(extraData)
         );
     }
 
