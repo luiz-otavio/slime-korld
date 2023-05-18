@@ -240,7 +240,6 @@ public class ProtoSlimeFile {
         return mapData;
     }
 
-    @Nullable
     public NBTTagCompound getExtraData() {
         return extraData;
     }

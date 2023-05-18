@@ -142,7 +142,7 @@ public class SlimeOutputStream extends DataOutputStream {
         BitSet bitSet = new BitSet(width * depth);
 
         for (Chunk chunk : chunks) {
-            bitSet.set((chunk.locZ - minZ) * width + (chunk.locX - minX) , true);
+            bitSet.set((chunk.locZ - minZ) * width + (chunk.locX - minX), true);
         }
 
         int chunkSize = (int) Math.ceil((width * depth) / 8.0D);
@@ -277,29 +277,27 @@ public class SlimeOutputStream extends DataOutputStream {
             writeBoolean(false);
         }
 
-        if (slimeWorld.hasProperty(SettingsPropertyFactory.HAS_EXTRA_DATA)) {
-            NBTTagCompound compound = new NBTTagCompound();
+        NBTTagCompound extraCompound = new NBTTagCompound();
 
-            BukkitSlimePersistentContainer persistentContainer = new BukkitSlimePersistentContainer(
-                new NBTContainer(compound)
-            );
+        BukkitSlimePersistentContainer persistentContainer = new BukkitSlimePersistentContainer(
+            new NBTContainer(extraCompound)
+        );
 
-            for (AbstractSlimeData slimeData : dataRegistry.getRegistered()) {
-                slimeData.serialize(slimeWorld, persistentContainer);
-            }
-
-            ByteArrayDataOutput extraByteArrayOutputStream = ByteStreams.newDataOutput();
-            // Write extra data
-            writeCompound(extraByteArrayOutputStream, compound);
-
-            byte[] extraBytes = extraByteArrayOutputStream.toByteArray(),
-                extraCompressed = Zstd.compress(extraBytes);
-
-            writeInt(extraCompressed.length); // Compressed size
-            writeInt(extraBytes.length); // Not compressed size
-
-            write(extraCompressed);
+        for (AbstractSlimeData slimeData : dataRegistry.getRegistered()) {
+            slimeData.serialize(slimeWorld, persistentContainer);
         }
+
+        ByteArrayDataOutput extraByteArrayOutputStream = ByteStreams.newDataOutput();
+        // Write extra data
+        writeCompound(extraByteArrayOutputStream, extraCompound);
+
+        byte[] extraBytes = extraByteArrayOutputStream.toByteArray(),
+            extraCompressed = Zstd.compress(extraBytes);
+
+        writeInt(extraCompressed.length); // Compressed size
+        writeInt(extraBytes.length); // Not compressed size
+
+        write(extraCompressed);
 
         NBTTagCompound mapCompound = new NBTTagCompound();
         NBTTagList mapTagList = new NBTTagList();
