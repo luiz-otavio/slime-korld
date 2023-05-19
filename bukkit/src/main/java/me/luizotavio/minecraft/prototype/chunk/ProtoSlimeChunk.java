@@ -25,10 +25,12 @@
 package me.luizotavio.minecraft.prototype.chunk;
 
 import net.minecraft.server.v1_8_R3.*;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * @author Luiz Otávio de Farias Corrêa
@@ -89,7 +91,11 @@ public class ProtoSlimeChunk {
             TileEntity entity = TileEntity.c(tileEntity);
 
             if (entity != null) {
-                chunk.a(entity);
+                try {
+                    chunk.a(entity);
+                } catch (Exception exception) {
+                    Bukkit.getLogger().log(Level.SEVERE, "Cannot put tile entity.");
+                }
             }
         }
 
