@@ -252,12 +252,8 @@ public class BukkitSlimeWorld implements SlimeWorld {
                     int x = LongHash.msw(key),
                         z = LongHash.lsw(key);
 
-                    Chunk chunk = dataManager.createChunkLoader(null)
-                        .a(craftWorld, x, z);
-
                     craftWorld.chunkProviderServer
-                        .chunks
-                        .put(key, chunk);
+                            .getChunkAt(x, z, () -> {});
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
