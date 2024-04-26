@@ -1,21 +1,23 @@
-# Slime Korld
-![ezgif-5-462d16c33c_1](https://user-images.githubusercontent.com/65752397/185532946-2aeb1c89-eee9-4324-8f72-087177edaa1e.gif)
+# <p align="center">Slime Korld</p>
+<div align="center">
+    <img src="https://img.shields.io/github/license/luiz-otavio/slime-korld?style=for-the-badge" alt="License"/>
+    <img src="https://img.shields.io/github/v/release/luiz-otavio/slime-korld?style=for-the-badge" alt="Release"/>
+    <img src="https://img.shields.io/github/actions/workflow/status/luiz-otavio/slime-korld/gradle.yml?branch=main&style=for-the-badge" alt="Build"/>
+    <img src="https://img.shields.io/github/issues/luiz-otavio/slime-korld?style=for-the-badge" alt="Issues"/>
+    <img src="https://img.shields.io/github/forks/luiz-otavio/slime-korld?style=for-the-badge" alt="Forks"/>
+    <img src="https://img.shields.io/github/stars/luiz-otavio/slime-korld?style=for-the-badge" alt="Stars"/>
+</div>
 
-Bukkit library to implement the Slime World Format from Hypixel.
+### <p align="center">Build and manage lightweight worlds in Minecraft.</p>
 
-## Overview
+## <p align="center">Overview</p>
 Slime Korld is a library that allows you to create Slime Worlds in a Minecraft Server.
-It introduce the right format of the slime format with extra data features and a simple API.
+It introduces the format of the slime format with extra data features and a simple API to customize the world generation, data storage, and data retrieval.
 
-Even it's simple, you can customize some delegates to change the way the world is generated or it's stored.
-## Hypixel Slime
-Since July of 2019, Hypixel has started using Slime World Format to store their skyblocks islands with less data in dedicated environments for storage.
-This library tries to support this format as well and try to make it easier to use.
-As we know, Anvil Format saves a lot of useless information for unique and small worlds which is used to mini-games and other things.
+Using worlds based on slime format, you can reduce the amount of data stored in the world file, making it easier to manage and store.
 
-`"Slime fixes the points outlined above, while sticking to a lot of Minecraft "standards", sometimes so software compatibility is easier, sometimes for performance."` - Hypixel DevBlog #5.
+The main idea was taken from the format of slime world used by Hypixel to store their skyblock islands:
+`"Slime fixes the points outlined above, while sticking to a lot of Minecraft "standards", sometimes so software compatibility is easier, sometimes for performance."` - [Hypixel DevBlog #5.](https://hypixel.net/threads/dev-blog-5-storing-your-skyblock-island.2190753/)
 
-You can find the full devblog here: https://hypixel.net/threads/dev-blog-5-storing-your-skyblock-island.2190753/
-
-## Documentation
-Please, follow the steps from wiki on [there](https://github.com/luiz-otavio/slime-korld/wiki).
+## <p align = "center"> Installation </p>
+Follow the steps to start using Slime Korld in your project by following the steps [there](https://github.com/luiz-otavio/slime-korld/wiki).
