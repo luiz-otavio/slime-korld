@@ -2,7 +2,7 @@
 <div align="center">
     <img src="https://img.shields.io/github/license/luiz-otavio/slime-korld?style=for-the-badge" alt="License"/>
     <img src="https://img.shields.io/github/v/release/luiz-otavio/slime-korld?style=for-the-badge" alt="Release"/>
-    <img src="https://img.shields.io/github/actions/workflow/status/luiz-otavio/slime-korld/gradle.yml?branch=main&style=for-the-badge" alt="Build"/>
+    <img src="https://img.shields.io/github/actions/workflow/status/luiz-otavio/slime-korld/gradle.yml?branch=ver/1.8.8&style=for-the-badge" alt="Build"/>
     <img src="https://img.shields.io/github/issues/luiz-otavio/slime-korld?style=for-the-badge" alt="Issues"/>
     <img src="https://img.shields.io/github/forks/luiz-otavio/slime-korld?style=for-the-badge" alt="Forks"/>
     <img src="https://img.shields.io/github/stars/luiz-otavio/slime-korld?style=for-the-badge" alt="Stars"/>
