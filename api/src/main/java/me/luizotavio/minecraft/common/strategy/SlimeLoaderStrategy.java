@@ -29,6 +29,8 @@ import me.luizotavio.minecraft.common.exception.InternalSlimeException;
 import me.luizotavio.minecraft.common.service.SlimeKorld;
 import org.bukkit.plugin.Plugin;
 
+import java.io.File;
+
 /**
  * Loader strategy to load/save slime world.
  * Unique instance for the delegator {@link SlimeKorld} to load/save the world.
@@ -43,6 +45,12 @@ public interface SlimeLoaderStrategy {
      * @return The plugin that is holding the loader strategy.
      */
     Plugin getPlugin();
+
+    /**
+     * Retrieve the world folder.
+     * @return
+     */
+    File getWorldFolder();
 
     /**
      * Load and retrieve the compressed data of the world.
