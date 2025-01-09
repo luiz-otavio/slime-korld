@@ -219,30 +219,7 @@ public class BukkitSlimeWorld implements SlimeWorld {
             throw new InternalSlimeException(e);
         }
 
-        SlimeDataManager dataManager = new SlimeDataManager(this, protoSlimeFile);
-
-        int dimension = CraftWorld.CUSTOM_DIMENSION_OFFSET + MINECRAFT_SERVER.worlds.size();
-
-        boolean isUsed = false;
-
-        // Check if dimension is already in use
-        do {
-            for (WorldServer worldServer : MINECRAFT_SERVER.worlds) {
-                isUsed = worldServer.dimension == dimension;
-
-                if (isUsed) {
-                    dimension++;
-                    break;
-                }
-            }
-        } while (isUsed);
-
-        CraftSlimeWorld craftWorld = new CraftSlimeWorld(
-            this,
-            protoSlimeFile,
-            dataManager,
-            dimension
-        );
+        CraftSlimeWorld craftWorld = getCraftSlimeWorld(protoSlimeFile);
 
         craftWorld.generator = new EmptyWorldGenerator();
 
@@ -267,8 +244,8 @@ public class BukkitSlimeWorld implements SlimeWorld {
             throw new InternalSlimeException("World initialization cancelled");
         }
 
-        MINECRAFT_SERVER.worlds.add(craftWorld);
-        MINECRAFT_SERVER.server.addWorld(craftWorld.getWorld());
+//        MINECRAFT_SERVER.worlds.add(craftWorld); - Naturally the World is added to the server
+//        MINECRAFT_SERVER.server.addWorld(craftWorld.getWorld());
 
         NBTTagCompound extraData = protoSlimeFile.getExtraData();
 
@@ -297,5 +274,33 @@ public class BukkitSlimeWorld implements SlimeWorld {
         }
 
         return craftWorld.getWorld();
+    }
+
+    private @NotNull CraftSlimeWorld getCraftSlimeWorld(ProtoSlimeFile protoSlimeFile) {
+        SlimeDataManager dataManager = new SlimeDataManager(this, protoSlimeFile);
+
+        int dimension = CraftWorld.CUSTOM_DIMENSION_OFFSET + MINECRAFT_SERVER.worlds.size();
+
+        boolean isUsed = false;
+
+        // Check if dimension is already in use
+        do {
+            for (WorldServer worldServer : MINECRAFT_SERVER.worlds) {
+                isUsed = worldServer.dimension == dimension;
+
+                if (isUsed) {
+                    dimension++;
+                    break;
+                }
+            }
+        } while (isUsed);
+
+        CraftSlimeWorld craftWorld = new CraftSlimeWorld(
+            this,
+            protoSlimeFile,
+            dataManager,
+            dimension
+        );
+        return craftWorld;
     }
 }

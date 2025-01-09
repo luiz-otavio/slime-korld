@@ -36,16 +36,15 @@ import me.luizotavio.minecraft.common.settings.factory.SettingsPropertyFactory;
 import me.luizotavio.minecraft.common.util.Pair;
 import me.luizotavio.minecraft.common.version.WorldVersion;
 import me.luizotavio.minecraft.data.container.BukkitSlimePersistentContainer;
+import me.luizotavio.minecraft.util.Worlds;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.util.BitSet;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static me.luizotavio.minecraft.common.version.SlimeVersion.CURRENT_SLIME_VERSION;
@@ -99,12 +98,13 @@ public class SlimeOutputStream extends DataOutputStream {
             throw new InternalSlimeException("World is null", null);
         }
 
+        Set<org.bukkit.Chunk> bukkitChunks = Worlds.loadAllChunks(world); // Load all chunks
+
         net.minecraft.server.v1_8_R3.WorldServer nmsWorld = ((CraftWorld) world).getHandle();
 
         // Fill all chunks and ordered by chunk X and Z. -- Took idea from SlimeWorldManager;
-        List<Chunk> chunks = nmsWorld.chunkProviderServer.chunks
-            .values()
-            .stream()
+        List<Chunk> chunks = bukkitChunks.stream()
+            .map(chunk -> ((CraftChunk) chunk).getHandle())
             .sorted(Comparator.comparingLong(chunk -> (long) chunk.locZ * Integer.MAX_VALUE + chunk.locX))
             .collect(Collectors.toList());
 

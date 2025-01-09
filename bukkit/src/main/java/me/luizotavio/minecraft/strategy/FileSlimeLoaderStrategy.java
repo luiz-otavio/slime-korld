@@ -56,6 +56,11 @@ public class FileSlimeLoaderStrategy implements SlimeLoaderStrategy {
     }
 
     @Override
+    public File getWorldFolder() {
+        return folder;
+    }
+
+    @Override
     public byte[] load(String name, boolean force) throws InternalSlimeException {
         File file = new File(folder, name + ".slime");
 

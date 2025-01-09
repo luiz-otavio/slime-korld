@@ -34,6 +34,7 @@ import me.saiintbrisson.minecraft.command.annotation.Command;
 import me.saiintbrisson.minecraft.command.command.Context;
 import me.saiintbrisson.minecraft.command.target.CommandTarget;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -79,6 +80,42 @@ public class SlimeCommand {
         slimeKorld.getLoaderStrategy().save(pair.getKey(), pair.getValue());
 
         player.sendMessage("§aWorld converted to new format");
+    }
+
+    @Command(
+        name = "slime.load"
+    )
+    public void handleSlimeLoadCommand(Context<Player> context, String worldName) throws InternalSlimeException {
+        Player player = context.getSender();
+
+        player.sendMessage("§aLoading world...");
+
+        SlimeKorld slimeKorld = Bukkit.getServicesManager()
+            .load(SlimeKorld.class);
+
+        File slimeFile = new File(
+            slimeKorld.getLoaderStrategy()
+                .getWorldFolder(),
+            worldName + ".slime"
+        );
+
+        if (!slimeFile.exists()) {
+            player.sendMessage("§cWorld not found");
+            return;
+        }
+
+        SlimeWorld slimeWorld = slimeKorld.getFactory()
+            .createWorld(
+                worldName,
+                WorldVersion.V1_8_R3
+            );
+
+        slimeWorld.setProperty(SettingsPropertyFactory.INITIALIZE_ALL_CHUNKS, true);
+        slimeWorld.setProperty(SettingsPropertyFactory.SHOULD_SAVE, true);
+        World targetWorld = slimeWorld.initialize();
+
+        player.teleport(targetWorld.getSpawnLocation());
+        player.sendMessage("§aWorld loaded");
     }
 
     @Command(
